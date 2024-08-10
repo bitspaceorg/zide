@@ -1,0 +1,28 @@
+# Build artifacts
+build/
+CMakeFiles/
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+*.ilk
+*.pdb
+*.lib
+*.dll
+
+# CMake cache and configuration
+CMakeCache.txt
+*.cmake
+
+# IDE files
+.vscode/
+.idea/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+.DS_Store
+imgui.ini
+compile_commands.json
