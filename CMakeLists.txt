@@ -5,13 +5,13 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(SOURCES 
   src/foo.cpp
-  src/imgui.cpp
-  src/imgui_demo.cpp
-  src/imgui_draw.cpp
-  src/imgui_tables.cpp
-  src/imgui_widgets.cpp
-  src/imgui_impl_glfw.cpp
-  src/imgui_impl_opengl3.cpp
+  src/IMGUI/imgui.cpp
+  src/IMGUI/imgui_demo.cpp
+  src/IMGUI/imgui_draw.cpp
+  src/IMGUI/imgui_tables.cpp
+  src/IMGUI/imgui_widgets.cpp
+  src/IMGUI/imgui_impl_glfw.cpp
+  src/IMGUI/imgui_impl_opengl3.cpp
   src/main.cpp
 )
 
@@ -41,7 +41,9 @@ include_directories(${GLAD_DIR}/include)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
+target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include/IMGUI)
 target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include)
+
 if(APPLE)
     target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw glad "-framework Cocoa" "-framework IOKit" "-framework CoreFoundation")
 elseif(UNIX AND NOT APPLE)

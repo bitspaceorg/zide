@@ -5,37 +5,39 @@
 #include <iostream>
 #define GL_SILENCE_DEPRECATION
 
-static void glfw_error_callback(int error, const char* description) {
+static void glfw_error_callback(int error, const char *description) {
   std::cerr << "GLFW Error" << error << description << std::endl;
 }
 
 // Main code
-int main(int, char**) {
+int main(int, char **) {
   glfwSetErrorCallback(glfw_error_callback);
   if (glfwInit() == 0)
     return 1;
 
-  const char* glsl_version = "#version 150";
+
+  const char *glsl_version = "#version 150";
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);  // Required on Mac
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Required on Mac
 
-  GLFWwindow* window = glfwCreateWindow(
-    1280, 720, "ZIDE - Zide Is a Design Environment", nullptr, nullptr);
+  GLFWwindow *window = glfwCreateWindow(
+      1280, 720, "ZIDE - Zide Is a Design Environment", nullptr, nullptr);
+
   if (window == nullptr)
     return 1;
+
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1);
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
-  ImGuiIO& io = ImGui::GetIO();
-  (void)io;
+  ImGuiIO &io = ImGui::GetIO();
   ImGui::StyleColorsDark();
-  //ImGui::StyleColorsLight();
+  // ImGui::StyleColorsLight();
 
-  ImGuiStyle& style = ImGui::GetStyle();
+  ImGuiStyle &style = ImGui::GetStyle();
   if ((io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) != 0) {
     style.WindowRounding = 0.0f;
     style.Colors[ImGuiCol_WindowBg].w = 1.0f;
@@ -59,13 +61,14 @@ int main(int, char**) {
       static float f = 0.0f;
       static int counter = 0;
 
-      ImGui::Begin("Hello, world!"); 
+      ImGui::Begin("Hello, world!");
 
       ImGui::Text("This is some useful text.");
 
-      ImGui::SliderFloat( "float", &f, 0.0f, 1.0f);
+      ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
 
-      if ( ImGui::Button( "Button")) counter++;
+      if (ImGui::Button("Button"))
+        counter++;
 
       ImGui::End();
     }
@@ -78,7 +81,7 @@ int main(int, char**) {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     if ((io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) != 0) {
-      GLFWwindow* backup_current_context = glfwGetCurrentContext();
+      GLFWwindow *backup_current_context = glfwGetCurrentContext();
       ImGui::UpdatePlatformWindows();
       ImGui::RenderPlatformWindowsDefault();
       glfwMakeContextCurrent(backup_current_context);
