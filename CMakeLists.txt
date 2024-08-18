@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(SOURCES 
   src/utils.cpp
+  src/theme.cpp
   src/app.cpp
   src/IMGUI/imgui.cpp
   src/IMGUI/imgui_demo.cpp
