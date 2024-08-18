@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.29.0)
 
-project("gogh")
+project("zide")
 set(CMAKE_CXX_STANDARD 17)
 
 set(SOURCES 
-  src/foo.cpp
+  src/utils.cpp
+  src/app.cpp
   src/IMGUI/imgui.cpp
   src/IMGUI/imgui_demo.cpp
   src/IMGUI/imgui_draw.cpp

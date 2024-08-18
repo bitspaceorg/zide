@@ -3,24 +3,31 @@
 #include "imgui_impl_opengl3.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
+
+#include "app.h"
+
 #define GL_SILENCE_DEPRECATION
 
 static void glfw_error_callback(int error, const char *description) {
   std::cerr << "GLFW Error" << error << description << std::endl;
 }
 
-// Main code
 int main(int, char **) {
   glfwSetErrorCallback(glfw_error_callback);
   if (glfwInit() == 0)
     return 1;
 
-
+#if defined(__APPLE__)
   const char *glsl_version = "#version 150";
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Required on Mac
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#else
+  const char *glsl_version = "#version 130";
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+#endif
 
   GLFWwindow *window = glfwCreateWindow(
       1280, 720, "ZIDE - Zide Is a Design Environment", nullptr, nullptr);
@@ -34,58 +41,45 @@ int main(int, char **) {
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGuiIO &io = ImGui::GetIO();
-  ImGui::StyleColorsDark();
-  // ImGui::StyleColorsLight();
+  (void)io;
 
-  ImGuiStyle &style = ImGui::GetStyle();
-  if ((io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) != 0) {
-    style.WindowRounding = 0.0f;
-    style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-  }
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
-  while (glfwWindowShouldClose(window) == 0) {
+  ImVec4 clear_color =
+      ImVec4(236.0f / 255.0f, 231.0f / 255.0f, 219.0f / 255.0f, 1.0f);
+
+  initialize_application();
+
+  while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
-    if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
-      ImGui_ImplGlfw_Sleep(10);
-      continue;
-    }
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    {
-      static float f = 0.0f;
-      static int counter = 0;
+    /*
+     * do stuff here
+     */
 
-      ImGui::Begin("Hello, world!");
+    run_application();
 
-      ImGui::Text("This is some useful text.");
+    /*
+     * end stuff here
+     */
 
-      ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-
-      if (ImGui::Button("Button"))
-        counter++;
-
-      ImGui::End();
-    }
-
+    ImGui::EndFrame();
     ImGui::Render();
+
     int display_w, display_h;
     glfwGetFramebufferSize(window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
+    glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w,
+                 clear_color.z * clear_color.w, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-    if ((io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) != 0) {
-      GLFWwindow *backup_current_context = glfwGetCurrentContext();
-      ImGui::UpdatePlatformWindows();
-      ImGui::RenderPlatformWindowsDefault();
-      glfwMakeContextCurrent(backup_current_context);
-    }
 
     glfwSwapBuffers(window);
   }
@@ -98,4 +92,4 @@ int main(int, char **) {
   glfwTerminate();
 
   return 0;
-}
+};
