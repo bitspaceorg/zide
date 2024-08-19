@@ -10,9 +10,13 @@ ImGuiWindowFlags WINDOWS_FLAG =
     ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNav |
     ImGuiWindowFlags_NoBringToFrontOnFocus;
 
-void initialize_application() { apply_style(); }
-
 AppState app_state;
+
+void initialize_application() {
+  apply_style();
+  initialize_grid(app_state.GRID_SIZE);
+}
+
 void run_application() {
   render_main_menu_bar();
   if (app_state.is_timeline_visible) {
@@ -24,6 +28,7 @@ void run_application() {
   if (app_state.is_colorswatch_visible) {
     render_color_swatch();
   }
+  render_grid();
 };
 
 static void render_toolbar(ToolbarState *toolbar_state) {
@@ -112,3 +117,133 @@ static void render_color_swatch() {
   ImGui::Begin("Color Swatch", NULL, WINDOWS_FLAG);
   ImGui::End();
 }
+
+static void initialize_grid(int size) {
+  app_state.GRID_SIZE = size;
+  app_state.pixelColors.resize(
+      app_state.GRID_SIZE,
+      std::vector<ImVec4>(app_state.GRID_SIZE, ImVec4(0.0f, 0.0f, 0.0f, 0.0f)));
+}
+
+static void render_grid() {
+  ImDrawList *drawList = ImGui::GetBackgroundDrawList();
+  ImVec2 screenCenter = ImGui::GetIO().DisplaySize;
+  screenCenter.x *= 0.5f;
+  screenCenter.y *= 0.5f;
+  ImVec2 gridTopLeft(
+      screenCenter.x - (app_state.GRID_SIZE * app_state.PIXEL_SIZE / 2) +
+          app_state.panOffset.x,
+      screenCenter.y - (app_state.GRID_SIZE * app_state.PIXEL_SIZE / 2) +
+          app_state.panOffset.y);
+
+  ImVec2 gridBottomRight(
+      screenCenter.x + (app_state.GRID_SIZE * app_state.PIXEL_SIZE / 2) +
+          app_state.panOffset.x,
+      screenCenter.y + (app_state.GRID_SIZE * app_state.PIXEL_SIZE / 2) +
+          app_state.panOffset.y);
+  ImVec2 windowSize = ImGui::GetIO().DisplaySize;
+
+  double gridSize = app_state.GRID_SIZE * app_state.PIXEL_SIZE;
+  double tileSize = gridSize / 8.0;
+
+  for (double y = 0; y < gridSize; y += tileSize) {
+    for (double x = 0; x < gridSize; x += tileSize) {
+      ImVec2 pixelMin(gridTopLeft.x + x, gridTopLeft.y + y);
+      ImVec2 pixelMax(pixelMin.x + tileSize, pixelMin.y + tileSize);
+
+      ImU32 color =
+          ((static_cast<int>(x / tileSize) + static_cast<int>(y / tileSize)) %
+               2 ==
+           0)
+              ? ImColor(200, 200, 200, 255)
+              : ImColor(150, 150, 150, 255);
+
+      drawList->AddRectFilled(pixelMin, pixelMax, color);
+    }
+  }
+
+  int startX =
+      std::max(0, static_cast<int>(-gridTopLeft.x / app_state.PIXEL_SIZE));
+  int startY =
+      std::max(0, static_cast<int>(-gridTopLeft.y / app_state.PIXEL_SIZE));
+  int endX = std::min(
+      app_state.GRID_SIZE,
+      static_cast<int>((windowSize.x - gridTopLeft.x) / app_state.PIXEL_SIZE) +
+          1);
+  int endY = std::min(
+      app_state.GRID_SIZE,
+      static_cast<int>((windowSize.y - gridTopLeft.y) / app_state.PIXEL_SIZE) +
+          1);
+  for (int y = startY; y < endY; y++) {
+    for (int x = startX; x < endX; x++) {
+      ImVec2 pixelMin(gridTopLeft.x + x * app_state.PIXEL_SIZE,
+                      gridTopLeft.y + y * app_state.PIXEL_SIZE);
+      ImVec2 pixelMax(pixelMin.x + app_state.PIXEL_SIZE,
+                      pixelMin.y + app_state.PIXEL_SIZE);
+      drawList->AddRectFilled(pixelMin, pixelMax,
+                              ImColor(app_state.pixelColors[y][x]));
+    }
+  }
+
+  static ImVec2 lastPixel(-1, -1);
+  if (ImGui::IsMouseDown(0)) {
+    ImVec2 mousePos = ImGui::GetMousePos();
+    int x = (mousePos.x - gridTopLeft.x) / app_state.PIXEL_SIZE;
+    int y = (mousePos.y - gridTopLeft.y) / app_state.PIXEL_SIZE;
+    if (x >= 0 && x < app_state.GRID_SIZE && y >= 0 &&
+        y < app_state.GRID_SIZE) {
+if (lastPixel.x != -1 && lastPixel.y != -1) {
+        int pixelDistanceX = abs(x - lastPixel.x);
+        int pixelDistanceY = abs(y - lastPixel.y);
+        int stepX = lastPixel.x < x ? 1 : -1;
+        int stepY = lastPixel.y < y ? 1 : -1;
+        int errorAccumulator = pixelDistanceX - pixelDistanceY;
+        while (true) {
+          if (lastPixel.x >= 0 && lastPixel.x < app_state.GRID_SIZE &&
+              lastPixel.y >= 0 && lastPixel.y < app_state.GRID_SIZE) {
+            app_state.pixelColors[lastPixel.y][lastPixel.x] =
+                ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+            ImVec2 pixelMin(gridTopLeft.x + lastPixel.x * app_state.PIXEL_SIZE,
+                            gridTopLeft.y + lastPixel.y * app_state.PIXEL_SIZE);
+            ImVec2 pixelMax(pixelMin.x + app_state.PIXEL_SIZE,
+                            pixelMin.y + app_state.PIXEL_SIZE);
+            drawList->AddRectFilled(
+                pixelMin, pixelMax,
+                ImColor(app_state.pixelColors[lastPixel.y][lastPixel.x]));
+          }
+          if (lastPixel.x == x && lastPixel.y == y)
+            break;
+
+          int errorDouble = 2 * errorAccumulator;
+          if (errorDouble > -pixelDistanceY) {
+            errorAccumulator -= pixelDistanceY;
+            lastPixel.x += stepX;
+          }
+          if (errorDouble < pixelDistanceX) {
+            errorAccumulator += pixelDistanceX;
+            lastPixel.y += stepY;
+          }
+        }
+      }
+      lastPixel = ImVec2(x, y);
+    } else
+      lastPixel = ImVec2(-1, -1);
+  } else
+    lastPixel = ImVec2(-1, -1);
+
+  ImGuiIO &io = ImGui::GetIO();
+  if (ImGui::IsMouseDragging(ImGuiMouseButton_Middle)) {
+    if (!app_state.isPanning) {
+      app_state.isPanning = true;
+      app_state.lastMousePos = io.MousePos;
+    }
+    ImVec2 mouseDelta = ImVec2(io.MousePos.x - app_state.lastMousePos.x,
+                               io.MousePos.y - app_state.lastMousePos.y);
+    app_state.panOffset.x += mouseDelta.x;
+    app_state.panOffset.y += mouseDelta.y;
+    app_state.lastMousePos = io.MousePos;
+  } else {
+    app_state.isPanning = false;
+  }
+}
+
