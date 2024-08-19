@@ -7,6 +7,11 @@ set(SOURCES
   src/utils.cpp
   src/theme.cpp
   src/app.cpp
+  src/colorswatch.cpp
+  src/editor.cpp
+  src/menubar.cpp
+  src/timeline.cpp
+  src/toolbar.cpp
   src/IMGUI/imgui.cpp
   src/IMGUI/imgui_demo.cpp
   src/IMGUI/imgui_draw.cpp
