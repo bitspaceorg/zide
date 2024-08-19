@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include "imgui.h"
 
 enum SelectedTool { SELECTED_PENCIL, SELECTED_ERASER, SELECTED_BUCKET };
 struct ToolbarState {
@@ -34,6 +35,15 @@ struct AppState {
   ToolbarState toolbar_state;
   TimelineState timeline;
   ColorSwatchState color_swatch;
+
+  // editor stuff
+  ImVec2 panOffset = ImVec2(0, 0);
+  ImVec2 lastMousePos = ImVec2(0, 0);
+  bool isPanning = false;
+  float panSpeed = 10.0f;
+  int GRID_SIZE = 512;
+  const int PIXEL_SIZE = 1;
+  std::vector<std::vector<ImVec4>> pixelColors;
 };
 extern AppState app_state;
 
@@ -43,3 +53,5 @@ static void render_toolbar(ToolbarState *toolbar_state);
 static void render_main_menu_bar();
 static void render_timeline();
 static void render_color_swatch();
+static void initialize_grid(int size);
+static void render_grid();
