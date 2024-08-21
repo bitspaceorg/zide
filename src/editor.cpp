@@ -63,27 +63,39 @@ static void draw_transperant_background(int CANVAS_SIZE, int PIXEL_SIZE,
   }
 }
 
-
 /* LOOP THROUGH A VEC<VEC<PIXEL>> AND RENDER THEM ON CANVAS.
  * Draws only one frame.
  *
  */
-static void draw_single_frame(ImVec2(grid_top_left_point), EditorState *editor_state, ImVec2 display_size, ImDrawList *draw_list) {
+static void draw_single_frame(ImVec2(grid_top_left_point),
+                              EditorState *editor_state, ImVec2 display_size,
+                              ImDrawList *draw_list) {
   const int PIXEL_SIZE = editor_state->PIXEL_SIZE;
   const int CANVAS_SIZE = editor_state->CANVAS_SIZE;
 
-  int start_x = std::max(0, static_cast<int>(-grid_top_left_point.x / PIXEL_SIZE));
-  int start_y = std::max(0, static_cast<int>(-grid_top_left_point.y / PIXEL_SIZE));
+  int start_x =
+      std::max(0, static_cast<int>(-grid_top_left_point.x / PIXEL_SIZE));
+  int start_y =
+      std::max(0, static_cast<int>(-grid_top_left_point.y / PIXEL_SIZE));
 
-  int end_x = std::min( CANVAS_SIZE, static_cast<int>((display_size.x - grid_top_left_point.x) / PIXEL_SIZE) + 1);
-  int end_y = std::min( CANVAS_SIZE, static_cast<int>((display_size.y - grid_top_left_point.y) / PIXEL_SIZE) + 1);
+  int end_x = std::min(
+      CANVAS_SIZE,
+      static_cast<int>((display_size.x - grid_top_left_point.x) / PIXEL_SIZE) +
+          1);
+  int end_y = std::min(
+      CANVAS_SIZE,
+      static_cast<int>((display_size.y - grid_top_left_point.y) / PIXEL_SIZE) +
+          1);
 
   for (int y = start_y; y < end_y; y++) {
     for (int x = start_x; x < end_x; x++) {
-      ImVec2 pixel_top_left(grid_top_left_point.x + x * PIXEL_SIZE, grid_top_left_point.y + y * PIXEL_SIZE);
-      ImVec2 pixel_bottom_right(pixel_top_left.x + PIXEL_SIZE, pixel_top_left.y + PIXEL_SIZE);
+      ImVec2 pixel_top_left(grid_top_left_point.x + x * PIXEL_SIZE,
+                            grid_top_left_point.y + y * PIXEL_SIZE);
+      ImVec2 pixel_bottom_right(pixel_top_left.x + PIXEL_SIZE,
+                                pixel_top_left.y + PIXEL_SIZE);
 
-      draw_list->AddRectFilled(pixel_top_left, pixel_bottom_right, ImColor(editor_state->pixel_colors[y][x]));
+      draw_list->AddRectFilled(pixel_top_left, pixel_bottom_right,
+                               ImColor(editor_state->pixel_colors[y][x]));
     }
   }
 }
@@ -91,16 +103,52 @@ static void draw_single_frame(ImVec2(grid_top_left_point), EditorState *editor_s
 /* HANDLER FOR MOUSE MOVEMENT.
  * Can draw and pan.
  */
-static ImVec2 editor_event_listner(EditorState *editor_state, ImVec2 grid_top_left_point, ImDrawList *draw_list) {
+static ImVec2 editor_event_listner(EditorState *editor_state,
+                                   ImVec2 grid_top_left_point,
+                                   ImDrawList *draw_list) {
   static ImVec2 last_pixel(-1, -1);
   ImVec2 mouse_position = ImGui::GetMousePos();
+
+  /* PANNING LOGIC
+   *
+   */
+  if (ImGui::IsMouseDragging(ImGuiMouseButton_Middle)) {
+    if (!editor_state->is_panning) {
+      editor_state->is_panning = true;
+      editor_state->last_mouse_pos = mouse_position;
+    }
+    ImVec2 mouse_difference =
+        ImVec2(mouse_position.x - editor_state->last_mouse_pos.x,
+               mouse_position.y - editor_state->last_mouse_pos.y);
+    editor_state->pan_offset.x += mouse_difference.x;
+    editor_state->pan_offset.y += mouse_difference.y;
+    editor_state->last_mouse_pos = mouse_position;
+  } else {
+    editor_state->is_panning = false;
+  }
+
+  if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) ||
+      ImGui::IsKeyDown(ImGuiKey_RightCtrl)) {
+    if (ImGui::IsKeyPressed(ImGuiKey_Equal)) {
+      editor_state->PIXEL_SIZE = editor_state->PIXEL_SIZE + 2;
+    } else if (ImGui::IsKeyPressed(ImGuiKey_Minus)) {
+      editor_state->PIXEL_SIZE = std::max(editor_state->PIXEL_SIZE - 2, 1);
+    }
+  }
+
+  if (ImGui::GetIO().MouseWheel > 0)
+    editor_state->PIXEL_SIZE = editor_state->PIXEL_SIZE + 2;
+  else if (ImGui::GetIO().MouseWheel < 0)
+    editor_state->PIXEL_SIZE = std::max(editor_state->PIXEL_SIZE - 2, 1);
 
   if (!ImGui::IsMouseDown(0))
     return last_pixel = ImVec2(-1, -1);
 
   if (ImGui::IsMouseDown(0)) {
-    int x = (mouse_position.x - grid_top_left_point.x) / editor_state->PIXEL_SIZE;
-    int y = (mouse_position.y - grid_top_left_point.y) / editor_state->PIXEL_SIZE;
+    int x =
+        (mouse_position.x - grid_top_left_point.x) / editor_state->PIXEL_SIZE;
+    int y =
+        (mouse_position.y - grid_top_left_point.y) / editor_state->PIXEL_SIZE;
 
     if (!is_over_canvas(x, y, editor_state->CANVAS_SIZE))
       return last_pixel = ImVec2(-1, -1);
@@ -108,8 +156,7 @@ static ImVec2 editor_event_listner(EditorState *editor_state, ImVec2 grid_top_le
     if (last_pixel.x == -1 && last_pixel.y == -1)
       return last_pixel = ImVec2(x, y);
 
-
-    /* 
+    /*
      * THE BELOW LINES FOR MAKING LINE CONTINUES WHEN MOUSE MOVES FAST.
      *
      */
@@ -145,26 +192,7 @@ static ImVec2 editor_event_listner(EditorState *editor_state, ImVec2 grid_top_le
         error_accumulator += pixel_distance_x;
         last_pixel.y += step_y;
       }
-
     }
-  }
-
-  /* PANNING LOGIC
-   *
-   */
-  if (ImGui::IsMouseDragging(ImGuiMouseButton_Middle)) {
-    if (!editor_state->is_panning) {
-      editor_state->is_panning = true;
-      editor_state->last_mouse_pos = mouse_position;
-    }
-    ImVec2 mouse_difference =
-        ImVec2(mouse_position.x - editor_state->last_mouse_pos.x,
-               mouse_position.y - editor_state->last_mouse_pos.y);
-    editor_state->pan_offset.x += mouse_difference.x;
-    editor_state->pan_offset.y += mouse_difference.y;
-    editor_state->last_mouse_pos = mouse_position;
-  } else {
-    editor_state->is_panning = false;
   }
 
   return ImVec2();
