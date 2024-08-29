@@ -5,6 +5,9 @@
 #include "utils.h"
 #include <vector>
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+
 /* Init the global vector<vector<PIXEL>> with transperant values
  *
  */
@@ -13,6 +16,8 @@ void initialize_grid(int size, EditorState *editor_state) {
   editor_state->pixel_colors.resize(
       size, std::vector<ImVec4>(size, ImVec4(0.0f, 0.0f, 0.0f, 0.0f)));
 }
+
+
 
 /* HOLDS THE ENTIRE EDITOR CANVAS RENDER LOGIC
  *
@@ -33,6 +38,27 @@ void render_grid(EditorState *editor_state) {
   draw_single_frame(grid_top_left_point, editor_state, display_size, draw_list);
 
   editor_event_listner(editor_state, grid_top_left_point, draw_list);
+}
+
+void save_screenshot(EditorState* editor_state){
+  const int  CANVAS_SIZE = editor_state->CANVAS_SIZE;
+  const int image_width = CANVAS_SIZE;
+  const int image_height = CANVAS_SIZE;
+
+  std::vector<unsigned char> image_data(image_width * image_height * 4, 0);
+  int index = 0;
+  for(int y = 0;y < CANVAS_SIZE; y++){
+    for(int x = 0; x < CANVAS_SIZE; x++){
+      ImVec4 color = editor_state->pixel_colors[y][x];
+
+      image_data[index++] = static_cast<unsigned char>(color.x * 255.0f);
+      image_data[index++] = static_cast<unsigned char>(color.y * 255.0f);
+      image_data[index++] = static_cast<unsigned char>(color.z * 255.0f);
+      image_data[index++] = static_cast<unsigned char>(color.w * 255.0f);
+    }
+  }
+  stbi_write_png_compression_level = 0;
+  stbi_write_png("zide.png", image_height, image_width, 4, image_data.data(), image_width * 4);
 }
 
 /* Used to render chessboard like thingy for
@@ -108,6 +134,10 @@ static ImVec2 editor_event_listner(EditorState *editor_state,
                                    ImDrawList *draw_list) {
   static ImVec2 last_pixel(-1, -1);
   ImVec2 mouse_position = ImGui::GetMousePos();
+
+  if(ImGui::IsKeyPressed(ImGuiKey_F2)){
+    save_screenshot( editor_state);
+  }
 
   /* PANNING LOGIC
    *
