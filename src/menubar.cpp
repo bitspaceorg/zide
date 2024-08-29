@@ -1,3 +1,4 @@
+#include "editor.h"
 #include "imgui.h"
 #include "app.h"
 
@@ -7,6 +8,9 @@ void render_main_menu_bar() {
       if (ImGui::MenuItem("New", "CTRL+N")) {
       }
       if (ImGui::MenuItem("Open", "CTRL+O")) {
+      }
+      if (ImGui::MenuItem("Export", "F2")) {
+        save_screenshot(&app_state.editor_state);
       }
       ImGui::Separator();
       if (ImGui::MenuItem("Exit", "CTRL+X")) {
