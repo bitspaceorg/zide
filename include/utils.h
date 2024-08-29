@@ -11,4 +11,5 @@ inline ImGuiWindowFlags WINDOW_FLAGS =
 
 
 float get_center(float X, float x);
-std::pair<ImVec2, ImVec2> get_grid_coordinates(ImVec2 screen_center, int GRID_SIZE, int PIXEL_SIZE, ImVec2 pan_offset);
+std::pair<ImVec2, ImVec2> get_grid_coordinates(ImVec2 screen_center, int CANVAS_WIDTH, int CANVAS_HEIGHT, int PIXEL_SIZE, ImVec2 pan_offset);
+

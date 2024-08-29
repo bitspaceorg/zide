@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include "imgui.h"
-#include "imgui_impl_opengl3.h"
 
 /*  TOOLBAR STATE
  *
@@ -43,7 +42,9 @@ struct ColorSwatchState {
 /* EDITOR STATE
  */
 struct EditorState {
-  int CANVAS_SIZE = 32;
+  int CANVAS_SIZE = 512;
+  int CANVAS_WIDTH = 32;
+  int CANVAS_HEIGHT = 64;
   int PIXEL_SIZE = 10;
   ImVec2 pan_offset = ImVec2(0, 0);
   ImVec2 last_mouse_pos = ImVec2(0, 0);
