@@ -11,7 +11,7 @@ AppState app_state;
 
 void initialize_application() {
   apply_style();
-  initialize_grid(app_state.editor_state.CANVAS_SIZE, &app_state.editor_state);
+  initialize_grid(app_state.editor_state.CANVAS_WIDTH, app_state.editor_state.CANVAS_HEIGHT, &app_state.editor_state);
 }
 
 void run_application() {
