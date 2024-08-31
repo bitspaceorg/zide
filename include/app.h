@@ -43,8 +43,8 @@ struct ColorSwatchState {
  */
 struct EditorState {
   int CANVAS_SIZE = 512;
-  int CANVAS_WIDTH = 32;
-  int CANVAS_HEIGHT = 64;
+  int CANVAS_WIDTH = 512;
+  int CANVAS_HEIGHT = 512;
   int PIXEL_SIZE = 10;
   ImVec2 pan_offset = ImVec2(0, 0);
   ImVec2 last_mouse_pos = ImVec2(0, 0);

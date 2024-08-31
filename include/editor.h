@@ -11,4 +11,8 @@ static ImVec2 editor_event_listner(EditorState *editor_state,
                                    ImDrawList *draw_list);
 static bool is_over_canvas(int x, int y, int CANVAS_WIDTH, int CANVAS_HEIGHT);
 void save_screenshot(EditorState* editor_state);
+static void draw_and_erase(EditorState* editor_state, ImVec2 start, ImVec2 end, ImVec2 grid_top_left_point, ImDrawList* draw_list);
+
+static void fill_bucket(EditorState *editor_state, ImDrawList *draw_list,ImVec2 grid_top_left_point,
+                        int start_x, int start_y);
 
