@@ -1,6 +1,11 @@
 #include "editor.h"
 #include "imgui.h"
+#include "utils.h"
 #include "app.h"
+#include <iostream>
+#include <string>
+#include <filesystem>
+#include <fstream>
 
 void render_main_menu_bar() {
   if (ImGui::BeginMainMenuBar()) {
@@ -14,6 +19,15 @@ void render_main_menu_bar() {
       }
       ImGui::Separator();
       if (ImGui::MenuItem("Exit", "CTRL+X")) {
+      }
+    	if (ImGui::BeginMenu("Import")) {
+      	if (ImGui::MenuItem("Color palete", "CTRL+SHIFT+C")) {
+					std::string contents = open_file_dialog_return_contents_gpl();
+					if(contents.size()>1){
+						parse_gpl_file(contents, app_state.color_swatch_state);
+					}
+      	}
+				ImGui::EndMenu();
       }
       ImGui::EndMenu();
     }
