@@ -37,6 +37,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 set(GLFW_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glfw-3.4)
 set(GLAD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glad)
+set(NFD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/nativefiledialog)
 
 #  NOTE: FINDING GLFW
 add_subdirectory(${GLFW_DIR})
@@ -46,14 +47,18 @@ include_directories(${GLFW_DIR}/include)
 add_library(glad STATIC ${GLAD_DIR}/src/glad.c)
 include_directories(${GLAD_DIR}/include)
 
+# Add NativeFileDialog subdirectory
+add_subdirectory(${NFD_DIR})
+include_directories(${NFD_DIR}/src ${NFD_DIR}/include)
+
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include/IMGUI)
 target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
 if(APPLE)
-    target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw glad "-framework Cocoa" "-framework IOKit" "-framework CoreFoundation")
+    target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw glad nativefiledialog "-framework Cocoa" "-framework IOKit" "-framework CoreFoundation")
 elseif(UNIX AND NOT APPLE)
     find_package(X11 REQUIRED)
-    target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw glad ${X11_LIBRARIES} ${CMAKE_DL_LIBS})
+    target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw glad nativefiledialog ${X11_LIBRARIES} ${CMAKE_DL_LIBS})
 endif()

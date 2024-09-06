@@ -247,6 +247,7 @@ static void draw_and_erase(EditorState *editor_state, ImVec2 start, ImVec2 end,
   int step_x = last_pixel.x < x ? 1 : -1;
   int step_y = last_pixel.y < y ? 1 : -1;
   int error_accumulator = pixel_distance_x - pixel_distance_y;
+	auto [name, r, g, b, a] = app_state.color_swatch_state.pallet[app_state.color_swatch_state.current_active];
 
   while (true) {
     if (last_pixel.x >= 0 && last_pixel.x < editor_state->CANVAS_WIDTH &&
@@ -258,7 +259,7 @@ static void draw_and_erase(EditorState *editor_state, ImVec2 start, ImVec2 end,
       else if (app_state.toolbar_state.selected_tool == SELECTED_PENCIL)
         editor_state->pixel_colors[static_cast<int>(last_pixel.y)]
                                   [static_cast<int>(last_pixel.x)] =
-            ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+            ImVec4(r, g, b, a);
 
       ImVec2 pixelMin(
           grid_top_left_point.x + last_pixel.x * editor_state->PIXEL_SIZE,
@@ -300,13 +301,14 @@ static void fill_bucket(EditorState *editor_state, ImDrawList *draw_list,ImVec2 
   visited[start_y][start_x] = true;
   const int dx[] = {0, 1, 0, -1};
   const int dy[] = {-1, 0, 1, 0};
+	auto [name, r, g, b, a] = app_state.color_swatch_state.pallet[app_state.color_swatch_state.current_active];
 
   while (!q.empty()) {
     int x = q.front().first;
     int y = q.front().second;
     q.pop();
 
-    editor_state->pixel_colors[y][x] = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+    editor_state->pixel_colors[y][x] = ImVec4(r, g, b, a);
 
     ImVec2 pixelMin(
         grid_top_left_point.x + x * editor_state->PIXEL_SIZE,
@@ -321,7 +323,7 @@ static void fill_bucket(EditorState *editor_state, ImDrawList *draw_list,ImVec2 
 
       if (new_x >= 0 && new_x < WIDTH && new_y >= 0 && new_y < HEIGHT && !visited[new_y][new_x] ) {
         ImVec4 color =  editor_state->pixel_colors[new_y][new_x];
-        if(color.x == 1.0f && color.y == 0.0f && color.z == 0.0f && color.w == 1.0f ) continue;
+        if(color.w == 1.0f ) continue;
         q.push({new_x, new_y});
         visited[new_y][new_x] = 1;
       }

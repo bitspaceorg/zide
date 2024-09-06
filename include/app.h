@@ -5,6 +5,8 @@
 #include <vector>
 #include "imgui.h"
 
+#include "colorswatch.h"
+
 /*  TOOLBAR STATE
  *
  */
@@ -22,21 +24,6 @@ struct TimelineState {
   int fps = 24;
   int total_frames = 1;
   int current_seekhead = 0;
-};
-
-/* COLOR SWATCH STATE
- *
- */
-struct Color {
-  std::string name;
-  float r, g, b, a;
-};
-struct ColorSwatchState {
-  std::vector<Color> pallet{
-      Color{.name = "black", .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f},
-      Color{.name = "white", .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f},
-      Color{.name = "red", .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f}};
-  int current_active = 0;
 };
 
 /* EDITOR STATE
@@ -61,10 +48,16 @@ struct AppState {
   bool is_timeline_visible = true;
   bool is_toolbar_visible = true;
   bool is_colorswatch_visible = true;
-
   ToolbarState toolbar_state;
   TimelineState timeline_state;
-  ColorSwatchState color_swatch_state;
+  ColorSwatchState color_swatch_state = {
+		.pallet = {
+      Color{.name = "Black", .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f},
+      Color{.name = "Red", .r = 1.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f},
+      Color{.name = "Green", .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f}
+    },
+    .current_active = 0
+	};
   EditorState editor_state;
 };
 extern AppState app_state;
