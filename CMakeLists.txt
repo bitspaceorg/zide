@@ -4,6 +4,7 @@ project("zide")
 set(CMAKE_CXX_STANDARD 17)
 
 set(SOURCES 
+  src/undo_redo.cpp
   src/utils.cpp
   src/theme.cpp
   src/app.cpp

@@ -1,9 +1,12 @@
 #pragma once
 
 #include "imgui.h"
+#include <array>
+#include <atomic>
+#include <unordered_map>
+#include <stack>
 #include <string>
 #include <vector>
-#include "imgui.h"
 
 #include "colorswatch.h"
 
@@ -21,15 +24,40 @@ struct ToolbarState {
  *
  */
 struct TimelineState {
-  int fps = 24;
+  int fps = 2;
+  int active_frame = 0;
   int total_frames = 1;
-  int current_seekhead = 0;
+  std::atomic<bool> is_animating;
 };
+
+/* HOLD UP */
+
+enum ACTION { StrokeAction, AddFrameAction, DeleteFrameAction };
+
+struct ArrayHash {
+    std::size_t operator()(const std::array<int, 3>& arr) const {
+        std::size_t hash = 0;
+        for (int i : arr) {
+            hash ^= std::hash<int>()(i) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+        }
+        return hash;
+    }
+};
+
+struct UndoRedoState {
+  std::stack<std::unordered_map<std::array<int, 3>, ImVec4, ArrayHash>> stroke_undo_stack,
+      stroke_redo_stack;
+  std::unordered_map<std::array<int, 3>, ImVec4, ArrayHash> undo_temp, redo_temp;
+
+  std::stack<int> undo_action_stack;
+  std::stack<int> redo_action_stack;
+};
+
+/* LET ME COOK */
 
 /* EDITOR STATE
  */
 struct EditorState {
-  int CANVAS_SIZE = 512;
   int CANVAS_WIDTH = 512;
   int CANVAS_HEIGHT = 512;
   int PIXEL_SIZE = 10;
@@ -37,7 +65,7 @@ struct EditorState {
   ImVec2 last_mouse_pos = ImVec2(0, 0);
   bool is_panning = false;
   float pan_speed = 10.0f;
-  std::vector<std::vector<ImVec4>> pixel_colors;
+  std::vector<std::vector<std::vector<ImVec4>>> pixel_colors;
 };
 
 /* GLOBAL APP STATE
@@ -59,6 +87,7 @@ struct AppState {
     .current_active = 0
 	};
   EditorState editor_state;
+  UndoRedoState undo_redo_state;
 };
 extern AppState app_state;
 
@@ -70,4 +99,4 @@ void initialize_application();
 // static void render_color_swatch();
 //
 // static void initialize_grid(int size, EditorState *editor_state);
-// static void render_grid(EditorState *editor_state);
+// static void reg[der_grid(EditorState *editor_state);

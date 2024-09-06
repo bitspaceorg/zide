@@ -1,8 +1,9 @@
 #include "editor.h"
-
-#include "app.h" 
+#include "app.h"
 #include "imgui.h"
 #include "utils.h"
+#include <array>
+#include <iostream>
 #include <queue>
 #include <vector>
 
@@ -16,7 +17,19 @@ void initialize_grid(int width, int height, EditorState *editor_state) {
   editor_state->CANVAS_WIDTH = width;
   editor_state->CANVAS_HEIGHT = height;
   editor_state->pixel_colors.resize(
-      height, std::vector<ImVec4>(width, ImVec4(0.0f, 0.0f, 0.0f, 0.0f)));
+      1,
+      std::vector<std::vector<ImVec4>>(
+          height, std::vector<ImVec4>(width, ImVec4(0.0f, 0.0f, 0.0f, 0.0f))));
+}
+
+void add_frame(int width, int height, EditorState *editor_state) {
+  app_state.timeline_state.total_frames += 1;
+  editor_state->pixel_colors.resize(
+      app_state.timeline_state.total_frames,
+      std::vector<std::vector<ImVec4>>(
+          height, std::vector<ImVec4>(width, ImVec4(0.0f, 0.0f, 0.0f, 0.0f))));
+  app_state.timeline_state.active_frame =
+      app_state.timeline_state.total_frames - 1;
 }
 
 /* HOLDS THE ENTIRE EDITOR CANVAS RENDER LOGIC
@@ -49,21 +62,26 @@ void save_screenshot(EditorState *editor_state) {
   const int CANVAS_WIDTH = editor_state->CANVAS_WIDTH;
   const int CANVAS_HEIGHT = editor_state->CANVAS_HEIGHT;
 
-  std::vector<unsigned char> image_data(CANVAS_WIDTH * CANVAS_HEIGHT * 4, 0);
+  std::vector<unsigned char> image_data(app_state.timeline_state.total_frames *
+                                            CANVAS_WIDTH * CANVAS_HEIGHT * 4,
+                                        0);
 
-  for (int y = 0; y < CANVAS_HEIGHT; y++) {
-    for (int x = 0; x < CANVAS_WIDTH; x++) {
-      ImVec4 color = editor_state->pixel_colors[y][x];
-      int index = (y * CANVAS_WIDTH + x) * 4;
-      image_data[index + 0] = static_cast<unsigned char>(color.x * 255.0f);
-      image_data[index + 1] = static_cast<unsigned char>(color.y * 255.0f);
-      image_data[index + 2] = static_cast<unsigned char>(color.z * 255.0f);
-      image_data[index + 3] = static_cast<unsigned char>(color.w * 255.0f);
+  for (int z = 0; z < app_state.timeline_state.total_frames; z++) {
+    for (int y = 0; y < CANVAS_HEIGHT; y++) {
+      for (int x = 0; x < CANVAS_WIDTH; x++) {
+        ImVec4 color = editor_state->pixel_colors[z][y][x];
+        int index = (y * CANVAS_WIDTH + x) * 4;
+        image_data[index + 0] = static_cast<unsigned char>(color.x * 255.0f);
+        image_data[index + 1] = static_cast<unsigned char>(color.y * 255.0f);
+        image_data[index + 2] = static_cast<unsigned char>(color.z * 255.0f);
+        image_data[index + 3] = static_cast<unsigned char>(color.w * 255.0f);
+      }
     }
   }
   stbi_write_png_compression_level = 0;
-  stbi_write_png("zide.png", CANVAS_WIDTH, CANVAS_HEIGHT, 4, image_data.data(),
-                 CANVAS_WIDTH * 4);
+  stbi_write_png("zide.png",
+                 CANVAS_WIDTH * app_state.timeline_state.total_frames,
+                 CANVAS_HEIGHT, 4, image_data.data(), CANVAS_WIDTH * 4);
 }
 
 /* Used to render chessboard like thingy for
@@ -129,8 +147,11 @@ static void draw_single_frame(ImVec2 grid_top_left_point,
       ImVec2 pixel_bottom_right(pixel_top_left.x + PIXEL_SIZE,
                                 pixel_top_left.y + PIXEL_SIZE);
 
-      draw_list->AddRectFilled(pixel_top_left, pixel_bottom_right,
-                               ImColor(editor_state->pixel_colors[y][x]));
+      draw_list->AddRectFilled(
+          pixel_top_left, pixel_bottom_right,
+          ImColor(
+              editor_state
+                  ->pixel_colors[app_state.timeline_state.active_frame][y][x]));
     }
   }
 }
@@ -144,12 +165,11 @@ static ImVec2 editor_event_listner(EditorState *editor_state,
   static ImVec2 last_pixel(-1, -1);
   ImVec2 mouse_position = ImGui::GetMousePos();
 
-  if(ImGui::IsAnyItemHovered()){
+  if (ImGui::IsAnyItemHovered()) {
     return ImVec2();
   }
 
-
-  /* SCREENSHOT KEYBIND 
+  /* SCREENSHOT KEYBIND
    *
    */
   if (ImGui::IsKeyPressed(ImGuiKey_F2)) {
@@ -194,10 +214,32 @@ static ImVec2 editor_event_listner(EditorState *editor_state,
   /* DRAWING LOGIC
    *
    */
-  if (!ImGui::IsMouseDown(0))
+  if (!ImGui::IsMouseDown(0)) {
+    if (!app_state.undo_redo_state.undo_temp.empty()) {
+      app_state.undo_redo_state.stroke_undo_stack.push(
+          app_state.undo_redo_state.undo_temp);
+      app_state.undo_redo_state.undo_temp.clear();
+      while (!app_state.undo_redo_state.stroke_redo_stack.empty())
+        app_state.undo_redo_state.stroke_redo_stack.pop();
+    }
     return last_pixel = ImVec2(-1, -1);
+  }
 
-  if (ImGui::IsMouseDown(0)) {
+  if (ImGui::IsKeyPressed(ImGuiKey_MouseLeft) &&
+      (app_state.toolbar_state.selected_tool == SELECTED_BUCKET)) {
+    int x =
+        (mouse_position.x - grid_top_left_point.x) / editor_state->PIXEL_SIZE;
+    int y =
+        (mouse_position.y - grid_top_left_point.y) / editor_state->PIXEL_SIZE;
+
+    if (!is_over_canvas(x, y, editor_state->CANVAS_WIDTH,
+                        editor_state->CANVAS_HEIGHT))
+      return last_pixel = ImVec2(-1, -1);
+    fill_bucket(editor_state, draw_list, grid_top_left_point, x, y);
+  }
+
+  if (ImGui::IsMouseDown(0) &&
+      !(app_state.toolbar_state.selected_tool == SELECTED_BUCKET)) {
     int x =
         (mouse_position.x - grid_top_left_point.x) / editor_state->PIXEL_SIZE;
     int y =
@@ -208,16 +250,13 @@ static ImVec2 editor_event_listner(EditorState *editor_state,
       return last_pixel = ImVec2(-1, -1);
 
     if (last_pixel.x == -1 && last_pixel.y == -1)
-      return last_pixel = ImVec2(x, y);
+      last_pixel = ImVec2(x, y);
 
     /*
      * THE BELOW LINES FOR MAKING LINE CONTINUES WHEN MOUSE MOVES FAST.
      *
      */
-    if(app_state.toolbar_state.selected_tool == SELECTED_BUCKET)
-      fill_bucket(editor_state, draw_list, grid_top_left_point, x, y);
-    else
-      draw_and_erase(editor_state, last_pixel, ImVec2(x, y), grid_top_left_point,
+    draw_and_erase(editor_state, last_pixel, ImVec2(x, y), grid_top_left_point,
                    draw_list);
     last_pixel = ImVec2(x, y);
   }
@@ -232,8 +271,7 @@ static bool is_over_canvas(int x, int y, int CANVAS_WIDTH, int CANVAS_HEIGHT) {
   return (x >= 0 && x < CANVAS_WIDTH && y >= 0 && y < CANVAS_HEIGHT);
 }
 
-
-/* DRAW AND ERASE 
+/* DRAW AND ERASE
  *
  */
 static void draw_and_erase(EditorState *editor_state, ImVec2 start, ImVec2 end,
@@ -249,15 +287,34 @@ static void draw_and_erase(EditorState *editor_state, ImVec2 start, ImVec2 end,
   int error_accumulator = pixel_distance_x - pixel_distance_y;
 	auto [name, r, g, b, a] = app_state.color_swatch_state.pallet[app_state.color_swatch_state.current_active];
 
+  int ux = static_cast<int>(last_pixel.x);
+  int uy = static_cast<int>(last_pixel.y);
+
   while (true) {
     if (last_pixel.x >= 0 && last_pixel.x < editor_state->CANVAS_WIDTH &&
         last_pixel.y >= 0 && last_pixel.y < editor_state->CANVAS_HEIGHT) {
+      int ux = static_cast<int>(last_pixel.x);
+      int uy = static_cast<int>(last_pixel.y);
+
+      ImVec4 prev_color =
+          editor_state
+              ->pixel_colors[app_state.timeline_state.active_frame][uy][ux];
+
+      if (app_state.undo_redo_state.undo_temp.find(
+              {app_state.timeline_state.active_frame, uy, ux}) ==
+          app_state.undo_redo_state.undo_temp.end())
+        app_state.undo_redo_state
+            .undo_temp[{app_state.timeline_state.active_frame, uy, ux}] =
+            prev_color;
+
       if (app_state.toolbar_state.selected_tool == SELECTED_ERASER)
-        editor_state->pixel_colors[static_cast<int>(last_pixel.y)]
+        editor_state->pixel_colors[app_state.timeline_state.active_frame]
+                                  [static_cast<int>(last_pixel.y)]
                                   [static_cast<int>(last_pixel.x)] =
             ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
       else if (app_state.toolbar_state.selected_tool == SELECTED_PENCIL)
-        editor_state->pixel_colors[static_cast<int>(last_pixel.y)]
+        editor_state->pixel_colors[app_state.timeline_state.active_frame]
+                                  [static_cast<int>(last_pixel.y)]
                                   [static_cast<int>(last_pixel.x)] =
             ImVec4(r, g, b, a);
 
@@ -268,8 +325,10 @@ static void draw_and_erase(EditorState *editor_state, ImVec2 start, ImVec2 end,
                       pixelMin.y + editor_state->PIXEL_SIZE);
       draw_list->AddRectFilled(
           pixelMin, pixelMax,
-          ImColor(editor_state->pixel_colors[static_cast<int>(last_pixel.y)]
-                                            [static_cast<int>(last_pixel.x)]));
+          ImColor(
+              editor_state->pixel_colors[app_state.timeline_state.active_frame]
+                                        [static_cast<int>(last_pixel.y)]
+                                        [static_cast<int>(last_pixel.x)]));
     }
 
     if (last_pixel.x == x && last_pixel.y == y)
@@ -290,43 +349,62 @@ static void draw_and_erase(EditorState *editor_state, ImVec2 start, ImVec2 end,
 /* BUCKET FILL LOGIC
  *
  */
-static void fill_bucket(EditorState *editor_state, ImDrawList *draw_list,ImVec2 grid_top_left_point,
-                        int start_x, int start_y) {
+static void fill_bucket(EditorState *editor_state, ImDrawList *draw_list,
+                        ImVec2 grid_top_left_point, int start_x, int start_y) {
   const int HEIGHT = editor_state->CANVAS_HEIGHT;
   const int WIDTH = editor_state->CANVAS_WIDTH;
   std::queue<std::pair<int, int>> q;
   std::vector<std::vector<int>> visited(HEIGHT, std::vector<int>(WIDTH, 0));
 
+  auto [name, r, g, b, a] = app_state.color_swatch_state.pallet[app_state.color_swatch_state.current_active];
+  ImVec4 original = editor_state->pixel_colors[app_state.timeline_state.active_frame] [start_y][start_x];
+
+  if (original.x == r && original.y == g && original.z == b && original.w == a) return;
   q.push({start_x, start_y});
   visited[start_y][start_x] = true;
   const int dx[] = {0, 1, 0, -1};
   const int dy[] = {-1, 0, 1, 0};
-	auto [name, r, g, b, a] = app_state.color_swatch_state.pallet[app_state.color_swatch_state.current_active];
+
+  std::unordered_map<std::array<int, 3>, ImVec4, ArrayHash> mp;
 
   while (!q.empty()) {
     int x = q.front().first;
     int y = q.front().second;
     q.pop();
 
-    editor_state->pixel_colors[y][x] = ImVec4(r, g, b, a);
+      mp[{app_state.timeline_state.active_frame, y, x}] =
+          editor_state
+              ->pixel_colors[app_state.timeline_state.active_frame][y][x];
 
-    ImVec2 pixelMin(
-        grid_top_left_point.x + x * editor_state->PIXEL_SIZE,
-        grid_top_left_point.y + y * editor_state->PIXEL_SIZE);
+    editor_state->pixel_colors[app_state.timeline_state.active_frame][y][x] = ImVec4(r, g, b, a);
+
+    ImVec2 pixelMin(grid_top_left_point.x + x * editor_state->PIXEL_SIZE,
+                    grid_top_left_point.y + y * editor_state->PIXEL_SIZE);
     ImVec2 pixelMax(pixelMin.x + editor_state->PIXEL_SIZE,
                     pixelMin.y + editor_state->PIXEL_SIZE);
-    draw_list->AddRectFilled(pixelMin, pixelMax, ImColor(editor_state->pixel_colors[y][x]));
+    draw_list->AddRectFilled(
+        pixelMin, pixelMax,
+        ImColor(
+            editor_state
+                ->pixel_colors[app_state.timeline_state.active_frame][y][x]));
 
     for (int i = 0; i < 4; ++i) {
       int new_x = x + dx[i];
       int new_y = y + dy[i];
 
-      if (new_x >= 0 && new_x < WIDTH && new_y >= 0 && new_y < HEIGHT && !visited[new_y][new_x] ) {
-        ImVec4 color =  editor_state->pixel_colors[new_y][new_x];
-        if(color.w == 1.0f ) continue;
+      if (new_x >= 0 && new_x < WIDTH && new_y >= 0 && new_y < HEIGHT &&
+          !visited[new_y][new_x]) {
+        ImVec4 color =
+            editor_state->pixel_colors[app_state.timeline_state.active_frame]
+                                      [new_y][new_x];
+        if (!(color.x == original.x && color.y == original.y && color.z == original.z && color.w == original.w)) continue;
         q.push({new_x, new_y});
         visited[new_y][new_x] = 1;
       }
     }
+  }
+  if (!mp.empty()) {
+    app_state.undo_redo_state.stroke_undo_stack.push(mp);
+    mp.clear();
   }
 }
