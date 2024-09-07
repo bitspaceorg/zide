@@ -45,9 +45,9 @@ int main(int, char **) {
 
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
-  io.Fonts->AddFontDefault();
-  ImFont* mainfont = io.Fonts->AddFontFromFileTTF("/home/vikram_18/dev/zide/assets/Helvetica.ttf", 18.5f, NULL, io.Fonts->GetGlyphRangesJapanese());
-  IM_ASSERT(mainfont != NULL);
+  // io.Fonts->AddFontDefault();
+  // ImFont* mainfont = io.Fonts->AddFontFromFileTTF("/home/vikram_18/dev/zide/assets/Helvetica.ttf", 18.5f, NULL, io.Fonts->GetGlyphRangesJapanese());
+  // IM_ASSERT(mainfont != NULL);
 
   LoadFonts();
 

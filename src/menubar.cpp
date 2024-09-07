@@ -2,10 +2,8 @@
 #include "imgui.h"
 #include "utils.h"
 #include "app.h"
-#include <iostream>
+#include "init.h"
 #include <string>
-#include <filesystem>
-#include <fstream>
 
 void render_main_menu_bar() {
   if (ImGui::BeginMainMenuBar()) {
@@ -36,6 +34,9 @@ void render_main_menu_bar() {
       }
       if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {
       }
+      if (ImGui::MenuItem("Change Dimensions", "")) {
+        app_state.editor_state.changing_dimensions = true;
+      }
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenu("Windows")) {
@@ -49,5 +50,8 @@ void render_main_menu_bar() {
       ImGui::EndMenu();
     }
     ImGui::EndMainMenuBar();
+  }
+  if (app_state.editor_state.changing_dimensions) {
+    render_dimensions_select();
   }
 }

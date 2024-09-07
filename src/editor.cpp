@@ -1,11 +1,12 @@
 #include "editor.h"
 #include "app.h"
 #include "imgui.h"
+#include "undo_redo.h"
 #include "utils.h"
+#include <algorithm>
 #include <array>
 #include <queue>
 #include <vector>
-#include <algorithm>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
@@ -16,7 +17,7 @@
 void initialize_grid(int width, int height, EditorState *editor_state) {
   editor_state->CANVAS_WIDTH = width;
   editor_state->CANVAS_HEIGHT = height;
-  editor_state->pixel_colors.resize(
+  editor_state->pixel_colors = std::vector<std::vector<std::vector<ImVec4>>>(
       1,
       std::vector<std::vector<ImVec4>>(
           height, std::vector<ImVec4>(width, ImVec4(0.0f, 0.0f, 0.0f, 0.0f))));
@@ -165,7 +166,8 @@ static ImVec2 editor_event_listner(EditorState *editor_state,
   static ImVec2 last_pixel(-1, -1);
   ImVec2 mouse_position = ImGui::GetMousePos();
 
-  if (ImGui::IsAnyItemHovered() || ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) {
+  if (ImGui::IsAnyItemHovered() ||
+      ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) {
     return ImVec2();
   }
   /* SCREENSHOT KEYBIND
@@ -199,16 +201,39 @@ static ImVec2 editor_event_listner(EditorState *editor_state,
   if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) ||
       ImGui::IsKeyDown(ImGuiKey_RightCtrl)) {
     if (ImGui::IsKeyPressed(ImGuiKey_Equal)) {
-      editor_state->PIXEL_SIZE = std::min(editor_state->PIXEL_SIZE + 1, MAX_PIXEL_SIZE);
+      editor_state->PIXEL_SIZE =
+          std::min(editor_state->PIXEL_SIZE + 1, MAX_PIXEL_SIZE);
     } else if (ImGui::IsKeyPressed(ImGuiKey_Minus)) {
-      editor_state->PIXEL_SIZE = std::max(editor_state->PIXEL_SIZE - 1, MIN_PIXEL_SIZE);
+      editor_state->PIXEL_SIZE =
+          std::max(editor_state->PIXEL_SIZE - 1, MIN_PIXEL_SIZE);
     }
   }
 
   if (ImGui::GetIO().MouseWheel > 0)
-    editor_state->PIXEL_SIZE = std::min(editor_state->PIXEL_SIZE + 1, MAX_PIXEL_SIZE);
+    editor_state->PIXEL_SIZE =
+        std::min(editor_state->PIXEL_SIZE + 1, MAX_PIXEL_SIZE);
   else if (ImGui::GetIO().MouseWheel < 0)
-    editor_state->PIXEL_SIZE = std::max(editor_state->PIXEL_SIZE - 1, MIN_PIXEL_SIZE);
+    editor_state->PIXEL_SIZE =
+        std::max(editor_state->PIXEL_SIZE - 1, MIN_PIXEL_SIZE);
+
+  /* UNDO/REDO LOGIC
+   *
+   */
+  if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) ||
+      ImGui::IsKeyDown(ImGuiKey_RightCtrl)) {
+    if (ImGui::IsKeyPressed(ImGuiKey_Z)) {
+      undo();
+    } else if (ImGui::IsKeyPressed(ImGuiKey_Y)) {
+      redo();
+    }
+  }
+
+  if (ImGui::GetIO().MouseWheel > 0)
+    editor_state->PIXEL_SIZE =
+        std::min(editor_state->PIXEL_SIZE + 1, MAX_PIXEL_SIZE);
+  else if (ImGui::GetIO().MouseWheel < 0)
+    editor_state->PIXEL_SIZE =
+        std::max(editor_state->PIXEL_SIZE - 1, MIN_PIXEL_SIZE);
 
   /* DRAWING LOGIC
    *

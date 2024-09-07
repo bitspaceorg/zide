@@ -54,16 +54,19 @@ struct UndoRedoState {
 
 /* LET ME COOK */
 const int MIN_PIXEL_SIZE = 1;
-const int MAX_PIXEL_SIZE = 10;
+const int MAX_PIXEL_SIZE = 70;
 /* EDITOR STATE
  */
 struct EditorState {
-  int CANVAS_WIDTH = 512;
-  int CANVAS_HEIGHT = 512;
+  int CANVAS_WIDTH = 0;
+  int CANVAS_HEIGHT = 0;
   int PIXEL_SIZE = 10;
   ImVec2 pan_offset = ImVec2(0, 0);
   ImVec2 last_mouse_pos = ImVec2(0, 0);
+
   bool is_panning = false;
+  bool changing_dimensions = false;
+
   float pan_speed = 10.0f;
   std::vector<std::vector<std::vector<ImVec4>>> pixel_colors;
 };
