@@ -80,9 +80,18 @@ struct AppState {
   TimelineState timeline_state;
   ColorSwatchState color_swatch_state = {
 		.pallet = {
-      Color{.name = "Black", .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f},
-      Color{.name = "Red", .r = 1.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f},
-      Color{.name = "Green", .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f}
+      Color{.name = "Color1", .r = 226.0f / 255.0f, .g = 228.0f / 255.0f, .b = 223.0f / 255.0f, .a = 1.0f}, // e2e4df
+      Color{.name = "Color2", .r = 197.0f / 255.0f, .g = 207.0f / 255.0f, .b = 196.0f / 255.0f, .a = 1.0f}, // c5cfc4
+      Color{.name = "Color3", .r = 168.0f / 255.0f, .g = 181.0f / 255.0f, .b = 174.0f / 255.0f, .a = 1.0f}, // a8b5ae
+      Color{.name = "Color4", .r = 146.0f / 255.0f, .g = 146.0f / 255.0f, .b = 156.0f / 255.0f, .a = 1.0f}, // 92929c
+      Color{.name = "Color5", .r = 255.0f / 255.0f, .g = 236.0f / 255.0f, .b = 237.0f / 255.0f, .a = 1.0f}, // ffeced
+      Color{.name = "Color6", .r = 251.0f / 255.0f, .g = 212.0f / 255.0f, .b = 210.0f / 255.0f, .a = 1.0f}, // fbd4d2
+      Color{.name = "Color7", .r = 241.0f / 255.0f, .g = 180.0f / 255.0f, .b = 180.0f / 255.0f, .a = 1.0f}, // f1b4b4
+      Color{.name = "Color8", .r = 204.0f / 255.0f, .g = 163.0f / 255.0f, .b = 163.0f / 255.0f, .a = 1.0f}, // cca3a3
+      Color{.name = "Color9", .r = 241.0f / 255.0f, .g = 234.0f / 255.0f, .b = 182.0f / 255.0f, .a = 1.0f}, // f1eab6
+      Color{.name = "Color10", .r = 228.0f / 255.0f, .g = 219.0f / 255.0f, .b = 160.0f / 255.0f, .a = 1.0f}, // e4dba0
+      Color{.name = "Color11", .r = 202.0f / 255.0f, .g = 193.0f / 255.0f, .b = 138.0f / 255.0f, .a = 1.0f}, // cac18a
+      Color{.name = "Color12", .r = 171.0f / 255.0f, .g = 164.0f / 255.0f, .b = 123.0f / 255.0f, .a = 1.0f}  // aba47b
     },
     .current_active = 0
 	};
