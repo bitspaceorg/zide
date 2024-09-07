@@ -45,6 +45,12 @@ int main(int, char **) {
 
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
+  io.Fonts->AddFontDefault();
+  ImFont* mainfont = io.Fonts->AddFontFromFileTTF("/home/vikram_18/dev/zide/assets/Helvetica.ttf", 18.5f, NULL, io.Fonts->GetGlyphRangesJapanese());
+  IM_ASSERT(mainfont != NULL);
+
+  LoadFonts();
+
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
@@ -63,9 +69,7 @@ int main(int, char **) {
     /*
      * do stuff here
      */
-
     run_application();
-
     /*
      * end stuff here
      */
