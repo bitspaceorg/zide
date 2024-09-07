@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(SOURCES 
   src/undo_redo.cpp
+  src/init.cpp
   src/utils.cpp
   src/theme.cpp
   src/app.cpp

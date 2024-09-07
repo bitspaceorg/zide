@@ -6,6 +6,7 @@
 #include "theme.h"
 #include "timeline.h"
 #include "toolbar.h"
+#include "init.h"
 #include "../fonts/embedded_font.inc"
 
 AppState app_state;
@@ -52,9 +53,9 @@ void LoadFonts() {
 
 void initialize_application() {
   apply_style();
-  initialize_grid(app_state.editor_state.CANVAS_WIDTH,
-                  app_state.editor_state.CANVAS_HEIGHT,
-                  &app_state.editor_state);
+  // initialize_grid(app_state.editor_state.CANVAS_WIDTH,
+  //                 app_state.editor_state.CANVAS_HEIGHT,
+  //                 &app_state.editor_state);
 }
 
 void run_application() {
@@ -69,7 +70,8 @@ void run_application() {
     render_color_swatch();
   }
   render_grid(&app_state.editor_state);
-  ImGui::ShowDemoWindow();
+  // ImGui::ShowDemoWindow();
+  if ((app_state.editor_state.CANVAS_HEIGHT == 0) && (app_state.editor_state.CANVAS_WIDTH == 0)) render_dimensions_select();
 };
 
 static void help_marker(const char *desc) {
