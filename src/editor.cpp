@@ -3,9 +3,9 @@
 #include "imgui.h"
 #include "utils.h"
 #include <array>
-#include <iostream>
 #include <queue>
 #include <vector>
+#include <algorithm>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
@@ -165,10 +165,9 @@ static ImVec2 editor_event_listner(EditorState *editor_state,
   static ImVec2 last_pixel(-1, -1);
   ImVec2 mouse_position = ImGui::GetMousePos();
 
-  if (ImGui::IsAnyItemHovered()) {
+  if (ImGui::IsAnyItemHovered() || ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) {
     return ImVec2();
   }
-
   /* SCREENSHOT KEYBIND
    *
    */
@@ -200,16 +199,16 @@ static ImVec2 editor_event_listner(EditorState *editor_state,
   if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) ||
       ImGui::IsKeyDown(ImGuiKey_RightCtrl)) {
     if (ImGui::IsKeyPressed(ImGuiKey_Equal)) {
-      editor_state->PIXEL_SIZE = editor_state->PIXEL_SIZE + 2;
+      editor_state->PIXEL_SIZE = std::min(editor_state->PIXEL_SIZE + 1, MAX_PIXEL_SIZE);
     } else if (ImGui::IsKeyPressed(ImGuiKey_Minus)) {
-      editor_state->PIXEL_SIZE = std::max(editor_state->PIXEL_SIZE - 2, 1);
+      editor_state->PIXEL_SIZE = std::max(editor_state->PIXEL_SIZE - 1, MIN_PIXEL_SIZE);
     }
   }
 
   if (ImGui::GetIO().MouseWheel > 0)
-    editor_state->PIXEL_SIZE = editor_state->PIXEL_SIZE + 2;
+    editor_state->PIXEL_SIZE = std::min(editor_state->PIXEL_SIZE + 1, MAX_PIXEL_SIZE);
   else if (ImGui::GetIO().MouseWheel < 0)
-    editor_state->PIXEL_SIZE = std::max(editor_state->PIXEL_SIZE - 2, 1);
+    editor_state->PIXEL_SIZE = std::max(editor_state->PIXEL_SIZE - 1, MIN_PIXEL_SIZE);
 
   /* DRAWING LOGIC
    *
@@ -285,7 +284,9 @@ static void draw_and_erase(EditorState *editor_state, ImVec2 start, ImVec2 end,
   int step_x = last_pixel.x < x ? 1 : -1;
   int step_y = last_pixel.y < y ? 1 : -1;
   int error_accumulator = pixel_distance_x - pixel_distance_y;
-	auto [name, r, g, b, a] = app_state.color_swatch_state.pallet[app_state.color_swatch_state.current_active];
+  auto [name, r, g, b, a] =
+      app_state.color_swatch_state
+          .pallet[app_state.color_swatch_state.current_active];
 
   int ux = static_cast<int>(last_pixel.x);
   int uy = static_cast<int>(last_pixel.y);
@@ -356,10 +357,15 @@ static void fill_bucket(EditorState *editor_state, ImDrawList *draw_list,
   std::queue<std::pair<int, int>> q;
   std::vector<std::vector<int>> visited(HEIGHT, std::vector<int>(WIDTH, 0));
 
-  auto [name, r, g, b, a] = app_state.color_swatch_state.pallet[app_state.color_swatch_state.current_active];
-  ImVec4 original = editor_state->pixel_colors[app_state.timeline_state.active_frame] [start_y][start_x];
+  auto [name, r, g, b, a] =
+      app_state.color_swatch_state
+          .pallet[app_state.color_swatch_state.current_active];
+  ImVec4 original =
+      editor_state->pixel_colors[app_state.timeline_state.active_frame][start_y]
+                                [start_x];
 
-  if (original.x == r && original.y == g && original.z == b && original.w == a) return;
+  if (original.x == r && original.y == g && original.z == b && original.w == a)
+    return;
   q.push({start_x, start_y});
   visited[start_y][start_x] = true;
   const int dx[] = {0, 1, 0, -1};
@@ -372,11 +378,11 @@ static void fill_bucket(EditorState *editor_state, ImDrawList *draw_list,
     int y = q.front().second;
     q.pop();
 
-      mp[{app_state.timeline_state.active_frame, y, x}] =
-          editor_state
-              ->pixel_colors[app_state.timeline_state.active_frame][y][x];
+    mp[{app_state.timeline_state.active_frame, y, x}] =
+        editor_state->pixel_colors[app_state.timeline_state.active_frame][y][x];
 
-    editor_state->pixel_colors[app_state.timeline_state.active_frame][y][x] = ImVec4(r, g, b, a);
+    editor_state->pixel_colors[app_state.timeline_state.active_frame][y][x] =
+        ImVec4(r, g, b, a);
 
     ImVec2 pixelMin(grid_top_left_point.x + x * editor_state->PIXEL_SIZE,
                     grid_top_left_point.y + y * editor_state->PIXEL_SIZE);
@@ -397,7 +403,9 @@ static void fill_bucket(EditorState *editor_state, ImDrawList *draw_list,
         ImVec4 color =
             editor_state->pixel_colors[app_state.timeline_state.active_frame]
                                       [new_y][new_x];
-        if (!(color.x == original.x && color.y == original.y && color.z == original.z && color.w == original.w)) continue;
+        if (!(color.x == original.x && color.y == original.y &&
+              color.z == original.z && color.w == original.w))
+          continue;
         q.push({new_x, new_y});
         visited[new_y][new_x] = 1;
       }

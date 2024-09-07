@@ -5,7 +5,6 @@
 #include <atomic>
 #include <unordered_map>
 #include <stack>
-#include <string>
 #include <vector>
 
 #include "colorswatch.h"
@@ -54,7 +53,8 @@ struct UndoRedoState {
 };
 
 /* LET ME COOK */
-
+const int MIN_PIXEL_SIZE = 1;
+const int MAX_PIXEL_SIZE = 10;
 /* EDITOR STATE
  */
 struct EditorState {
@@ -90,9 +90,11 @@ struct AppState {
   UndoRedoState undo_redo_state;
 };
 extern AppState app_state;
+extern ImFont* gFont;
 
 void run_application();
 void initialize_application();
+void LoadFonts();
 // static void render_toolbar(ToolbarState *toolbar_state);
 // static void render_main_menu_bar();
 // static void render_timeline();
