@@ -1,7 +1,10 @@
-#include <iostream>
+#include "app.h"
 
-int main() {
-  std::cout << "THE BEGINING AFTER THE END - \"ZIDE v0.0 OSTRICH\"" << std::endl;
+int main() {            // Zide Entry Point
+  App *app = new App(); // Main Application Instance
+
+  app->run();
+  app->exit();
 
   return 0;
 };
