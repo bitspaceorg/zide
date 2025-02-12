@@ -2,7 +2,7 @@
 #include "logger.h"
 
 // APPLICATION CONSTRUCTOR
-App::App() {};
+App::App(ZD::Context &ctx) : m_ctx(ctx) {};
 
 void App::run() {
   ZD_DEBUG("Hello from Zide !\n");
@@ -13,9 +13,11 @@ void App::run() {
     this->m_update();
     this->m_render();
   }
+
+  this->exit();
 }
 
-void App::exit() { ZD_DEBUG("Bye Bye Byeeeee !\n"); }
+void App::exit() { ZD_DEBUG("Bye from Zide !\n"); }
 
 // PRIVATE
 void App::m_init() {}

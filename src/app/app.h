@@ -1,13 +1,16 @@
 #pragma once
+#include "context.h"
 
 struct App {
-  App();
+  App(ZD::Context &ctx);
   ~App();
 
   void run();
   void exit();
 
 private:
+  ZD::Context &m_ctx;
+
   bool m_isRunning;
 
   void m_init();          // Initialize application
