@@ -7,7 +7,8 @@ project(
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(SOURCES src/zide.cpp)
+set(SOURCES src/utils/color.cpp src/utils/hsl.cpp src/utils/hsv.cpp
+            src/utils/rgb.cpp src/zide.cpp)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")

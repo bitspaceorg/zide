@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
-#include <malloc/_malloc.h>
 
 /* This algorithm converts RGB from parameter to
  * HSV. The algorithm is reference from the following
