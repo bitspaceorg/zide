@@ -10,7 +10,7 @@ class Sprite {
 public:
   // IN PIXELS
   Sprite(int height, int width, std::string name)
-      : m_spriteName(name), m_height(height), m_width(width){};
+      : m_spriteName(name), m_height(height), m_width(width) {};
 
 private:
   int m_height;

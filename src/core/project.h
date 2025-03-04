@@ -5,10 +5,9 @@
 
 namespace core {
 
-
 class Project {
 public:
-  Project(std::string projectName) : m_projectName(projectName){};
+  Project(std::string projectName) : m_projectName(projectName) {};
   void setAuthor(std::string author) { this->m_authorName = author; };
 
 private:

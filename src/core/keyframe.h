@@ -9,6 +9,7 @@ class KeyFrame {
 public:
   KeyFrame();
   bool isEmpty();
+
 private:
   std::vector<std::vector<Color>> m_grid;
 };

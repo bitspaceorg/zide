@@ -6,6 +6,7 @@ set(TOOLS_DIR "${SRC_DIR}/tools")
 set(UI_DIR "${SRC_DIR}/ui")
 set(UTILS_DIR "${SRC_DIR}/utils")
 set(CMD_DIR "${SRC_DIR}/command")
+set(CORE_DIR "${SRC_DIR}/core")
 
 file(GLOB APP_SOURCES "${APP_DIR}/*.cpp")
 file(GLOB GFX_SOURCES "${GFX_DIR}/*.cpp")
@@ -13,6 +14,7 @@ file(GLOB TOOLS_SOURCES "${TOOLS_DIR}/*.cpp")
 file(GLOB UI_SOURCES "${UI_DIR}/*.cpp")
 file(GLOB UTILS_SOURCES "${UTILS_DIR}/*.cpp")
 file(GLOB CMD_SOURCES "${CMD_DIR}/*.cpp")
+file(GLOB CORE_SOURCES "${CORE_DIR}/*.cpp")
 
 include_directories(
     ${APP_DIR}
