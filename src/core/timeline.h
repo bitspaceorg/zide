@@ -1,32 +1,34 @@
 #pragma once
-
 #include "forward_declarations.h"
-#include "layers.h"
-#include <vector>
 
+// clang-format off
 namespace core {
-
-enum class ANIMATION_TYPE { FORWARD, BACKWARD, PINGPONG };
-
 class Timeline {
 public:
-  Timeline();
+  enum class        ANIMATION_TYPE { FORWARD, BACKWARD, PINGPONG };
 
-  void play();
-  void stop();
-  void nextFrame();
-  void goToEnd();
-  void goToStart();
-  void setFPS(fps newFPS);
-  void setAnimationType(ANIMATION_TYPE animationType);
+                    Timeline(Sprite* parent);
+                    ~Timeline();
+
+  void              play();
+  void              stop();
+  void              goToEnd();
+  void              nextFrame();
+  void              goToStart();
+  void              setLayer(frame layer);     // [TODO]: Observer needed
+  void              setPlayHead(frame playhead);  // [TODO]: Observer needed
+  void              addNewLayer();
+  void              setFPS(fps fps);
+  void              setAnimationType(ANIMATION_TYPE animationType);
 
 private:
-  ANIMATION_TYPE m_animationType = ANIMATION_TYPE::FORWARD;
-  fps m_fps = 6;
-  frame m_playhead = 0;
-  frame m_maxFrame = 20;
+  fps               m_fps           = 6;
+  frame             m_playhead      = 0;
+  frame             m_selectedLayer = 0;
+  frame             m_maxFrame      = 20;
+  LayerList         m_layers;
+  ANIMATION_TYPE    m_animationType = ANIMATION_TYPE::FORWARD;
 
-  LayerList m_layers;
+  Sprite*           m_parentSprite;
 };
-
 } // namespace core

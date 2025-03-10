@@ -3,9 +3,9 @@
 #include <variant>
 
 #include "color.h"
-#include "rgb.h"
 #include "hsl.h"
 #include "hsv.h"
+#include "rgb.h"
 
 Color::Color(Format format) { this->m_currentFormat = format; };
 Color::Color() { this->m_currentFormat = Format::MASK; };
@@ -112,6 +112,22 @@ int Color::getGreen() {
       return RGB(arg).getGreen();
     } else if constexpr (std::is_same_v<T, HSV>) {
       return RGB(arg).getGreen();
+    };
+  };
+
+  return std::visit(visitor, this->m_value);
+};
+
+int Color::getAlpha() {
+  auto visitor = [](auto &&arg) -> int {
+    using T = std::decay_t<decltype(arg)>;
+
+    if constexpr (std::is_same_v<T, RGB>) {
+      return arg.getAlpha();
+    } else if constexpr (std::is_same_v<T, HSL>) {
+      return RGB(arg).getAlpha();
+    } else if constexpr (std::is_same_v<T, HSV>) {
+      return RGB(arg).getAlpha();
     };
   };
 

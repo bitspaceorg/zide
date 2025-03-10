@@ -1,5 +1,5 @@
 #pragma once
-
+// clang-format off
 #include <string>
 #include <variant>
 
@@ -21,11 +21,19 @@ public:
   int    getRed();
   int    getGreen();
   int    getBlue();
+  int    getAlpha();
   double getHue();
   double getHSVSaturation();
   double getHSLSaturation();
   double getValue();
   double getLightness();
+
+  bool operator==(Color &other) {
+    return this->getRed()    ==  other.getRed() &&
+           this->getGreen()  ==  other.getGreen() &&
+           this->getBlue()   ==  other.getBlue() &&
+           this->getAlpha()  ==  other.getAlpha();
+  }
 
 private:
   Color(Format format);
