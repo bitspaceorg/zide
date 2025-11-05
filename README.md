@@ -10,73 +10,85 @@
 
 - [Motivation](#motivation)
 - [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [License](#license)
+# ZIDE 🎨 — Minimal open-source pixel art editor
 
-# Motivation
+Zide (Zide Is a Design Environment) is a lightweight, cross-platform pixel art editor focused on creating sprites and simple 2D animations. The project aims to be minimal and approachable while providing the essential pixel-art workflow.
 
-We noticed that most pixel art tools are either locked behind paywalls or seem to do everything except pixel art. So, we created ZIDE: an open-source, easy-to-use pixel art app that just works!
+Demo: https://youtu.be/fCd_rc3UOm4
 
-# Features
+## Contents
 
-### Pixel Free Draw
-You can `draw`, `fill` and `erase` with the built-in tools
+- Motivation
+- Features
+- Installation
+- Usage
+- Notes & license
 
-![draw, eraser and fill](https://github.com/user-attachments/assets/a5b96288-9bf5-4e07-89d1-fc95526e652d)
+## Motivation
 
-### Undo and Redo
-You can `undo` and `redo` changes or mistakes made
+Many pixel-art tools are either commercial or targeted at broader image editing workflows. Zide exists to provide an open, focused editor that does pixel art well without extra clutter.
 
-![undo-redo](https://github.com/user-attachments/assets/4bdca8f8-0101-4677-a1b5-229784545c48)
+## Features
 
-### Panning and Zooming
-You can `zoom` or `pan` through the edit space
+- Freehand pixel drawing (draw / erase / fill)
+- Multiple frames / basic animation timeline
+- Pan & zoom controls
+- Import color palettes (.gpl)
+- Export sprite sheets
 
-![Zoom and Pan](https://github.com/user-attachments/assets/2cb7342c-4723-4a25-bdc9-585f9fa26710)
+Note: Some image links in the original README pointed to external attachment services and were removed for clarity. Feel free to re-add screenshots to `assets/`.
 
-### Import Pallets
-Import existing pallets made for pixelart through `.gpl`
+## Installation
 
-![import](https://github.com/user-attachments/assets/41b0c42f-6d8d-4fba-95e3-4b0af649aa83)
+Prerequisites
 
-### Animation
-You can create multiple frames into 2d-motion
+- Git
+- A C/C++ toolchain and CMake (the project uses CMake)
 
-![animate](https://github.com/user-attachments/assets/795ea0d3-b88d-42b6-a411-a73412cf2e2f)
+Clone
 
-### Export
-You can render the drawing as the sprite sheet
+```bash
+git clone https://github.com/jeevansridharan/zide.git
+cd zide
+```
 
-![export](https://github.com/user-attachments/assets/8d7f5a68-42c2-45f4-afae-021b08c514ca)
+Build (recommended)
 
+This project contains platform-agnostic CMake build files and helper scripts in `scripts/`.
 
-# Installation
-### Prerequisites
-Make sure you have the following installed on your system:
-- [Git](https://git-scm.com/)
-- ```gcc``` or ```clang```
+- Using the provided scripts (Unix-like shells):
 
-### Steps
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/bitspaceorg/zide.git
-   cd zide
-   ```
-2. **Install the necessary dependencies, if you haven't already** (if you haven't already).
-3. **Build the application with the following command**:
+  ```bash
+  ./scripts/rebuild_and_run_app.sh
+  # or
+  ./scripts/run_app.sh
+  ```
 
-   ```./scripts/rebuild_and_run_app.sh```
-4. **For running the application, later on, use the following command**:
+- On Windows you can build with CMake directly (PowerShell example):
 
-   ```./scripts/run_app.sh```
+  ```powershell
+  mkdir build; cd build
+  cmake ..
+  cmake --build . --config Release
+  ```
 
-# Usage
-1. Create a new project
-2. Name your project and mention the sprite pixel size
-3. Draw, fill and Erase through the edit arena
-4. Make multiple frames and make them as Animations
-5. Render the sprite sheet with all the frames
+If you prefer, use WSL or Git Bash to run the included shell scripts.
 
-# License
-This project is licensed under the MIT License. You are free to use, modify, and distribute this software under the terms of the [MIT LICENSE](https://github.com/zide-editor/zide-desktop/blob/main/LICENSE.md)
+For more details, check `INSTALL.md` and `CMakeLists.txt`.
+
+## Usage
+
+1. Start the app.
+2. Create a new project and set sprite dimensions.
+3. Draw using the pencil, fill with the bucket, and use undo/redo.
+4. Add frames to create animations and export as a sprite sheet.
+
+## Notes & license
+
+- The repository includes third-party vendor code under various open-source licenses (see `vendor/` for per-package license information). Some vendor libraries are MIT-licensed.
+- There is no top-level `LICENSE` file in the repository root; if you are the project owner and intend this project to be MIT-licensed, consider adding a top-level `LICENSE` file for clarity.
+
+If you'd like, I can:
+
+- Add screenshots to `assets/` and wire them into this README.
+- Create a top-level `LICENSE` file if you confirm the desired license.
